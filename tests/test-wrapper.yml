@@ -1,0 +1,35 @@
+name: Test tflint wrapper mode
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: setup
+        uses: .
+        with:
+          tflint_version: v0.50.3
+          tflint_wrapper: 'true'
+      - name: Assert tflint is installed
+        run: |
+          echo "tflint version: $(tflint --version)"
+          if ! tflint --version; then
+            echo "FAIL: tflint is not installed"
+            exit 1
+          fi
+          echo "PASS: tflint is installed with wrapper"
+      - name: Run tflint to generate wrapper outputs
+        id: tflint
+        run: tflint --version
+        continue-on-error: true
+      - name: Assert tflint-version output is set
+        env:
+          ACTUAL: ${{ steps.setup.outputs.tflint-version }}
+        run: |
+          echo "actual tflint-version: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: tflint-version output is empty"
+            exit 1
+          fi
+          echo "PASS: tflint-version output is '$ACTUAL'"
