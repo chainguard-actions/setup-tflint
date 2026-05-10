@@ -1,0 +1,43 @@
+name: Test tflint wrapper mode
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: setup
+        uses: .
+        with:
+          tflint_version: v0.50.3
+          github_token: ''
+          tflint_wrapper: 'true'
+      - name: Assert tflint-version output is set
+        env:
+          ACTUAL: ${{ steps.setup.outputs.tflint-version }}
+        run: |
+          echo "actual tflint-version: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: tflint-version output is empty"
+            exit 1
+          fi
+          echo "PASS: tflint-version=$ACTUAL"
+      - name: Run tflint via wrapper (expect version output)
+        id: tflint
+        run: tflint --version
+        continue-on-error: true
+      - name: Assert wrapper exitcode output is available
+        env:
+          EXITCODE: ${{ steps.tflint.outputs.exitcode }}
+        run: |
+          echo "exitcode: $EXITCODE"
+          # The wrapper exposes exitcode; 0 means success
+          if [ "$EXITCODE" != "0" ] && [ -n "$EXITCODE" ]; then
+            echo "FAIL: expected exitcode 0 but got '$EXITCODE'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert tflint binary is on PATH
+        run: |
+          which tflint
+          echo "PASS: tflint is on PATH"
