@@ -1,7 +1,7 @@
 {
   "owner": "terraform-linters",
   "name": "setup-tflint",
-  "visibility": "internal",
+  "visibility": "public",
   "description": "Sets up tflint CLI in your GitHub Actions workflow",
   "block_publish": false
 }
